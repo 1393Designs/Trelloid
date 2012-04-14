@@ -1,0 +1,9 @@
+build.xml
+proguard.cfg
+bin/*
+gen/*
+libs/*
+*.*.sw[op]
+Thumbs.db
+*.keystore
+*.properties
