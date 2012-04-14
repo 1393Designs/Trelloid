@@ -6,4 +6,5 @@ libs/*
 *.*.sw[op]
 Thumbs.db
 *.keystore
-*.properties
+local.properties
+ant.properties
