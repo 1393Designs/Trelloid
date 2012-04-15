@@ -11,7 +11,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.SortedSet;
 import java.util.Map.Entry;
 
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -34,10 +33,9 @@ import oauth.signpost.http.HttpParameters;
 import oauth.signpost.signature.HmacSha1MessageSigner;
 import oauth.signpost.signature.OAuthMessageSigner;
 
-
 public class OAuthHelper
 {
-	static private String TAG = "Trelloid.OAuthHelper";
+	static private String TAG = "Trelloid";
 
 	private OAuthConsumer mConsumer;
 	private OAuthProvider mProvider;
@@ -53,20 +51,25 @@ public class OAuthHelper
 		String reqUrl;
 
 		if( appname == null )
+		{
+			Log.i(TAG +"::OAuthHelper", "OOOOHHHHHH JJJJEEEEEZZ APP NAME IS NULL");
 			reqUrl = OAuth.addQueryParameters(
 				"https://trello.com/1/OAuthGetRequestToken",
 				"scope", scope);
+		}
 		else
+		{
+			Log.i(TAG +"::OAuthHelper", "App name isn't null.  Huh.");
 			reqUrl = OAuth.addQueryParameters(
-				"https://trello.com/1/OAuthGetRequestToken",
-				"scope", scope,
-				"xoauth_displayname", appname);
+				"https://trello.com/1/OAuthGetRequestToken?name=" +appname,
+				"scope", scope);
+		}
 
 		mConsumer = new CommonsHttpOAuthConsumer(consumerKey, consumerSecret);
 
 		mProvider = new CommonsHttpOAuthProvider(reqUrl,
 			"https://trello.com/1/OAuthGetAccessToken",
-			"https://trello.com/1/OAuthAuthorizeToken?hd=default"); // DBG: ???
+			"https://trello.com/1/OAuthAuthorizeToken"); // DBG: ???
 
 		mProvider.setOAuth10a(true);
 
@@ -80,6 +83,7 @@ public class OAuthHelper
 		OAuthCommunicationException
 	{
 		String authUrl = mProvider.retrieveRequestToken(mConsumer, mCallbackUrl);
+		Log.i(TAG +"::getRequestToken", "request token = " +authUrl);
 		return authUrl;
 	}
 
@@ -90,6 +94,8 @@ public class OAuthHelper
 		OAuthCommunicationException
 	{
 		mProvider.retrieveAccessToken(mConsumer, verifier);
+		Log.i(TAG +"::getAccessToken", "access token = " +mConsumer.getToken());
+		Log.i(TAG +"::getAccessToken", "token secret = " +mConsumer.getTokenSecret());
 		return new String[] {mConsumer.getToken(), mConsumer.getTokenSecret()};
 	}
 
@@ -127,6 +133,8 @@ public class OAuthHelper
 		while( (line = in.readLine()) != null )
 			sb.append(line + NL);
 		in.close();
+
+		Log.i(TAG +"::getUrlContent", "String = " +sb.toString());
 
 		return sb.toString();
 	}

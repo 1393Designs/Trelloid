@@ -4,14 +4,18 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import android.content.Context;
+import android.content.Intent;
 
 // Logging
 import android.util.Log;
 
-// HTTP
+/*// HTTP
 import android.net.http.AndroidHttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponse;*/
+
+// URI
+import android.net.Uri;
 
 // Buffers
 import java.io.BufferedReader;
@@ -24,42 +28,28 @@ import java.lang.Void;
 
 public class Trelloid extends Activity
 {
+	/*
 	private class SimpleRequest extends AsyncTask<String, Void, Void>
 	{
 		protected Void doInBackground(String... APIrequest)
 		{
-			/* get HTTP client */
-			AndroidHttpClient client = AndroidHttpClient.newInstance("Wget/1.13.4", ctx);
 
-			/* create a request */
-			HttpGet request = new HttpGet(APIrequest[0]);
-
-			/* create & get response */
-			try {
-				HttpResponse response = client.execute(request);
-
-
-				/* read response */
-				BufferedReader rd = new BufferedReader(new InputStreamReader(
-					response.getEntity().getContent()) );
-				String line = "";
-
-				Log.i(TAG, "Got response!");
-				while ((line = rd.readLine()) != null)
-					Log.i(TAG, line);
-			} catch(Exception e){
-				Log.w(TAG, "Exception: " +e.toString());
-			}
-			return null;
 		}
-	}
+	}*/
 
 
 	/* this must remain private! */
 	final String KEY = "4cc1f116e94dd123afd80f7c81d7a847";
 	final String TAG = "Trelloid";
 
+	final String CONS_KEY = "4cc1f116e94dd123afd80f7c81d7a847";
+	final String CONS_SECRET = "5e9d9f3c79fb0b5f54616420b5cb6be5a625652e69ef6dd8dd0e2ed5899ad8f9";
+	final String SCOPE = "read,write";
+	final String CB_URL = "trelloid://authorized";
+
 	final Context ctx = getApplication();
+
+	private OAuthHelper oah;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -68,7 +58,46 @@ public class Trelloid extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		new SimpleRequest().execute("https://api.trello.com/1/members/sjbarag?key=4cc1f116e94dd123afd80f7c81d7a847");
+		try {
+			oah = new OAuthHelper(CONS_KEY, CONS_SECRET, SCOPE, CB_URL, TAG);
 
+			String uri = oah.getRequestToken();
+			startActivity(new Intent("android.intent.action.VIEW", Uri.parse(uri)));
+		} catch (Exception e) {Log.e(TAG +"::onCreate", e.toString());}
+
+
+		//new SimpleRequest().execute("https://api.trello.com/1/members/sjbarag?key=4cc1f116e94dd123afd80f7c81d7a847");
+
+	}
+
+	private String[] getVerifier()
+	{
+		// extract the token if it exists
+		Uri uri = this.getIntent().getData();
+		if( uri == null )
+			return null;
+
+		String token = uri.getQueryParameter("oauth_token");
+		String verifier = uri.getQueryParameter("oauth_verifier");
+
+		Log.i(TAG +"::getVerifier", "token = " +token);
+		Log.i(TAG +"::getVerifier", "verifier = " +verifier);
+
+		return new String[] {token, verifier};
+	}
+
+	/** Called when the activity is resumed */
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+
+		String[] token = getVerifier();
+		if( token != null )
+		{
+			try{
+				String[] accessToken = oah.getAccessToken(token[1]);
+		} catch (Exception e) {Log.e(TAG +"::onResume", e.toString());}
+		}
 	}
 }
