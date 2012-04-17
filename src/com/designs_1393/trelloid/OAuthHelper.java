@@ -61,7 +61,8 @@ public class OAuthHelper
 		{
 			Log.i(TAG +"::OAuthHelper", "App name isn't null.  Huh.");
 			reqUrl = OAuth.addQueryParameters(
-				"https://trello.com/1/OAuthGetRequestToken?name=" +appname,
+				"https://trello.com/1/OAuthGetRequestToken/",
+				"name", appname,
 				"scope", scope);
 		}
 

@@ -47,9 +47,13 @@ public class Trelloid extends Activity
 	final String SCOPE = "read,write";
 	final String CB_URL = "trelloid://authorized";
 
+	private String[] token = null;
+	private String s_uri = null;
+
 	final Context ctx = getApplication();
 
 	private OAuthHelper oah;
+
 
 	/** Called when the activity is first created. */
 	@Override
@@ -58,16 +62,18 @@ public class Trelloid extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		try {
-			oah = new OAuthHelper(CONS_KEY, CONS_SECRET, SCOPE, CB_URL, TAG);
+		if( s_uri == null )
+		{
+			try {
+				oah = new OAuthHelper(CONS_KEY, CONS_SECRET, SCOPE, CB_URL, TAG);
 
-			String uri = oah.getRequestToken();
-			startActivity(new Intent("android.intent.action.VIEW", Uri.parse(uri)));
-		} catch (Exception e) {Log.e(TAG +"::onCreate", e.toString());}
-
+				Log.i(TAG +"::onCreate", "Creating another browser");
+				s_uri = oah.getRequestToken();
+				startActivity(new Intent("android.intent.action.VIEW", Uri.parse(s_uri)));
+			} catch (Exception e) {Log.e(TAG +"::onCreate", e.toString());}
+		}
 
 		//new SimpleRequest().execute("https://api.trello.com/1/members/sjbarag?key=4cc1f116e94dd123afd80f7c81d7a847");
-
 	}
 
 	private String[] getVerifier()
@@ -92,12 +98,18 @@ public class Trelloid extends Activity
 	{
 		super.onResume();
 
-		String[] token = getVerifier();
+		if( token == null)
+			token = getVerifier();
+
 		if( token != null )
 		{
 			try{
 				String[] accessToken = oah.getAccessToken(token[1]);
 		} catch (Exception e) {Log.e(TAG +"::onResume", e.toString());}
+			Log.i(TAG +"::onResume", "On Resume Done");
 		}
+		else
+			Log.w(TAG +"::onResume", "token is still null...");
+
 	}
 }
